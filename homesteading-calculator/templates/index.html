@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homesteading Calculator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            padding: 20px; 
+            color: #333;
+            background-color: #f9f9f7;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c5e1a;
+        }
+        .form-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-left {
+            flex: 1;
+            min-width: 300px;
+        }
+        .form-right {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .animal-input {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f5f5f0;
+        }
+        .animal-input:hover {
+            background-color: #eaeae0;
+        }
+        .animal-input label { 
+            flex: 1;
+            font-weight: bold;
+        }
+        .animal-input input { 
+            width: 80px;
+            margin-left: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .disclaimer-box {
+            background-color: #f5f5f0; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin-bottom: 20px;
+            margin-top: 40px;
+        }
+        #calculateButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: auto;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results-section {
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f7;
+        }
+        .summary-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f0;
+            border-radius: 5px;
+            border-left: 5px solid #4CAF50;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .summary-item {
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+        .note {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+        }
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            margin-right: 2px;
+            border-radius: 5px 5px 0 0;
+            color: #333;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Homesteading Calculator</h1>
+        <p>Plan your farm's land, feed, and water requirements</p>
+        <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+            Version 1.2 - National Average Data
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="form-left">
+            <h3>Enter the Number of Animals:</h3>
+            <form id="homesteadForm">
+                <div class="animal-input"><label>Chicken</label><input type="number" name="chicken" min="0" value="0"></div>
+                <div class="animal-input"><label>Duck</label><input type="number" name="duck" min="0" value="0"></div>
+                <div class="animal-input"><label>Goat (Meat)</label><input type="number" name="goat_meat" min="0" value="0"></div>
+                <div class="animal-input"><label>Goat (Dairy)</label><input type="number" name="goat_dairy" min="0" value="0"></div>
+                <div class="animal-input"><label>Sheep</label><input type="number" name="sheep" min="0" value="0"></div>
+                <div class="animal-input"><label>Cow (Beef)</label><input type="number" name="cow_beef" min="0" value="0"></div>
+                <div class="animal-input"><label>Cow (Dairy)</label><input type="number" name="cow_dairy" min="0" value="0"></div>
+                <div class="animal-input"><label>Miniature Cow</label><input type="number" name="cow_mini" min="0" value="0"></div>
+                <div class="animal-input"><label>Pig</label><input type="number" name="pig" min="0" value="0"></div>
+                <div class="animal-input"><label>Rabbit</label><input type="number" name="rabbit" min="0" value="0"></div>
+                <div class="animal-input"><label>Alpaca/Llama</label><input type="number" name="alpaca" min="0" value="0"></div>
+            </form>
+        </div>
+        <div class="form-right">
+            <div class="disclaimer-box">
+                <h4 style="margin-top: 0;">Important Note:</h4>
+                <p>All calculations are based on national averages for the United States. Actual requirements and costs may vary based on your specific location, climate, and local prices.</p>
+                <p class="note">Future versions will include regional calculations.</p>
+            </div>
+            <button id="calculateButton">Calculate Requirements</button>
+        </div>
+    </div>
+    
+    <div id="results" style="display:none;">
+        <h2>Your Homestead Plan</h2>
+        
+        <div class="summary-box">
+            <h3>Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <h4>Land Requirement</h4>
+                    <p id="recommendedAcreage">-</p>
+                    <span class="note">Based on feeding strategy</span>
+                </div>
+                <div class="summary-item">
+                    <h4>Daily Water Needs</h4>
+                    <p id="waterRequirement">-</p>
+                </div>
+                <div class="summary-item">
+                    <h4>Annual Feed Cost Range</h4>
+                    <p id="annualFeedCost">-</p>
+                    <span class="note">Min (10% supplement) to Max (full feeding)</span>
+                </div>
+                <div class="summary-item">
+                    <h4>Expected Annual Yield</h4>
+                    <p id="totalYield">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" id="detailsTabBtn">Details</button>
+                <button class="tab-button" id="chartsTabBtn">Charts</button>
+                <button class="tab-button" id="yieldsTabBtn">Yields</button>
+            </div>
+            
+            <div id="detailsTab" class="tab-content active">
+                <h3>Detailed Requirements by Animal</h3>
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <span class="national-avg-indicator" style="display: none; background-color: #f5f5f0; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;">
+                        <i>Based on national averages</i>
+                    </span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Animal</th>
+                            <th>Full Grazing (Acres)</th>
+                            <th>50/50 (Acres)</th>
+                            <th>Full Feeding (Acres)</th>
+                            <th>Daily Feed Cost Range</th>
+                            <th>Annual Feed Cost Range</th>
+                            <th>Water (Gal/Day)</th>
+                            <th>Expected Yield</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable"></tbody>
+                </table>
+                <p class="note">More supplemental feeding requires less acreage but increases costs.</p>
+            </div>
+            
+            <div id="chartsTab" class="tab-content">
+                <h3>Land Requirements Visualization</h3>
+                <div class="chart-container">
+                    <canvas id="landChart"></canvas>
+                </div>
+                
+                <h3>Cost Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
+                </div>
+            </div>
+            
+            <div id="yieldsTab" class="tab-content">
+                <h3>Expected Annual Yields</h3>
+                <div class="chart-container">
+                    <canvas id="yieldChart"></canvas>
+                </div>
+                <div class="summary-grid" style="margin-top: 30px;">
+                    <div class="summary-item">
+                        <h4>Total Eggs</h4>
+                        <p id="totalEggs">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Milk</h4>
+                        <p id="totalMilk">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Meat</h4>
+                        <p id="totalMeat">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Wool</h4>
+                        <p id="totalWool">-</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Fiber</h4>
+                        <p id="totalFiber">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Adding event listener to the calculate button
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('calculateButton').addEventListener('click', calculate);
+
+    // Tab functionality - using event listeners instead of inline onclick
+    document.getElementById('detailsTabBtn').addEventListener('click', function(event) {
+        openTab(event, 'detailsTab');
+    });
+    document.getElementById('chartsTabBtn').addEventListener('click', function(event) {
+        openTab(event, 'chartsTab');
+    });
+    document.getElementById('yieldsTabBtn').addEventListener('click', function(event) {
+        openTab(event, 'yieldsTab');
+    });
+});
+
+function openTab(evt, tabName) {
+    // Hide all tab content
+    let tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
+    }
+    
+    // Remove active class from all tab buttons
+    let tabButtons = document.getElementsByClassName("tab-button");
+    for (let i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].classList.remove("active");
+    }
+    
+    // Show the specific tab content
+    document.getElementById(tabName).classList.add("active");
+    
+    // Add active class to the button that opened the tab
+    evt.currentTarget.classList.add("active");
+}
+
+// Charts
+let landChart, costChart, yieldChart;
+
+function calculate() {
+    console.log("Calculate function called"); // Debug log
+    
+    let animalData = {};
+    let hasAnimals = false;
+    
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        let count = parseInt(input.value) || 0;
+        if (count > 0) {
+            animalData[input.name] = count;
+            hasAnimals = true;
+        }
+    });
+    
+    if (!hasAnimals) {
+        alert("Please enter at least one animal.");
+        return;
+    }
+    
+    console.log("Sending data to server:", animalData); // Debug log
+
+    fetch('http://127.0.0.1:5000/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            animals: animalData
+        })
+    })
+    .then(response => {
+        console.log("Response received:", response.status); // Debug log
+        return response.json();
+    })
+    .then(data => {
+        console.log("Data received:", data); // Debug log
+        
+        // Show results section
+        document.getElementById("results").style.display = "block";
+        
+        // Populate data table
+        let resultsTable = document.getElementById("resultsTable");
+        resultsTable.innerHTML = "";
+        
+        let totalAnnualCostMin = 0;
+        let totalAnnualCostMax = 0;
+        
+        Object.keys(data.animal_data).forEach(animal => {
+            let animalInfo = data.animal_data[animal];
+            totalAnnualCostMin += animalInfo.annual_cost_grazing;
+            totalAnnualCostMax += animalInfo.annual_cost_feeding;
+            
+            let displayName = animal
+                .replace('_', ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            
+            let row = '<tr>' +
+                '<td>' + displayName + '</td>' +
+                '<td>' + animalInfo.full_grazing.toFixed(2) + '</td>' +
+                '<td>' + animalInfo.fifty_fifty.toFixed(2) + '</td>' +
+                '<td>' + animalInfo.full_feeding.toFixed(2) + '</td>' +
+                '<td>$' + animalInfo.cost_grazing.toFixed(2) + ' - $' + animalInfo.cost_feeding.toFixed(2) + '</td>' +
+                '<td>$' + animalInfo.annual_cost_grazing.toFixed(2) + ' - $' + animalInfo.annual_cost_feeding.toFixed(2) + '</td>' +
+                '<td>' + animalInfo.water_gallons.toFixed(1) + '</td>' +
+                '<td>' + animalInfo.yield + '</td>' +
+            '</tr>';
+            resultsTable.innerHTML += row;
+        });
+
+        // Update summary boxes
+        document.getElementById("recommendedAcreage").textContent = 
+            data.min_acreage.toFixed(2) + " - " + data.max_acreage.toFixed(2) + " acres";
+        document.getElementById("waterRequirement").textContent = 
+            data.total_water_daily.toFixed(1) + " gallons per day";
+        document.getElementById("annualFeedCost").textContent = 
+            "$" + totalAnnualCostMin.toFixed(2) + " - $" + totalAnnualCostMax.toFixed(2);
+        
+        // Add national average indicator if applicable
+        if (data.is_national_average) {
+            document.querySelectorAll('.national-avg-indicator').forEach(element => {
+                element.style.display = 'inline';
+            });
+        }
+        
+        // Update yield totals
+        document.getElementById("totalEggs").textContent = 
+            data.total_yields.eggs + " eggs";
+        document.getElementById("totalMilk").textContent = 
+            data.total_yields.milk.toFixed(0) + " gallons";
+        document.getElementById("totalMeat").textContent = 
+            data.total_yields.meat.toFixed(0) + " lbs";
+        document.getElementById("totalWool").textContent = 
+            data.total_yields.wool.toFixed(1) + " lbs";
+        document.getElementById("totalFiber").textContent = 
+            data.total_yields.fiber.toFixed(1) + " lbs";
+            
+        // Summary of total yields
+        let yieldSummary = [];
+        if (data.total_yields.eggs > 0) yieldSummary.push(data.total_yields.eggs + " eggs");
+        if (data.total_yields.milk > 0) yieldSummary.push(data.total_yields.milk.toFixed(0) + " gal milk");
+        if (data.total_yields.meat > 0) yieldSummary.push(data.total_yields.meat.toFixed(0) + " lbs meat");
+        if (data.total_yields.wool > 0) yieldSummary.push(data.total_yields.wool.toFixed(1) + " lbs wool");
+        if (data.total_yields.fiber > 0) yieldSummary.push(data.total_yields.fiber.toFixed(1) + " lbs fiber");
+        
+        document.getElementById("totalYield").textContent = yieldSummary.join(', ');
+        
+        // Update charts
+        updateCharts(data);
+    })
+    .catch(error => {
+        console.error("Error communicating with Flask server:", error);
+        alert("Failed to connect to the server. Make sure the Flask app is running.");
+    });
+}
+
+function updateCharts(data) {
+    // Prepare chart data
+    const animals = Object.keys(data.animal_data).map(animal => 
+        animal.replace('_', ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
+    );
+    
+    const fullGrazingData = Object.values(data.animal_data).map(info => info.full_grazing);
+    const fiftyFiftyData = Object.values(data.animal_data).map(info => info.fifty_fifty);
+    const fullFeedingData = Object.values(data.animal_data).map(info => info.full_feeding);
+    
+    const minCostData = Object.values(data.animal_data).map(info => info.annual_cost_grazing);
+    const maxCostData = Object.values(data.animal_data).map(info => info.annual_cost_feeding);
+    
+    // Land chart
+    const landCtx = document.getElementById('landChart').getContext('2d');
+    if (landChart) landChart.destroy();
+    
+    landChart = new Chart(landCtx, {
+        type: 'bar',
+        data: {
+            labels: animals,
+            datasets: [
+                {
+                    label: 'Full Grazing (Acres)',
+                    data: fullGrazingData,
+                    backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                },
+                {
+                    label: '50/50 Approach (Acres)',
+                    data: fiftyFiftyData,
+                    backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                },
+                {
+                    label: 'Full Feeding (Acres)',
+                    data: fullFeedingData,
+                    backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Acres'
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Cost chart
+    const costCtx = document.getElementById('costChart').getContext('2d');
+    if (costChart) costChart.destroy();
+    
+    costChart = new Chart(costCtx, {
+        type: 'bar',
+        data: {
+            labels: animals,
+            datasets: [
+                {
+                    label: 'Min Annual Feed Cost (10% Supplement)',
+                    data: minCostData,
+                    backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                },
+                {
+                    label: 'Max Annual Feed Cost (Full Feeding)',
+                    data: maxCostData,
+                    backgroundColor: 'rgba(233, 30, 99, 0.7)',
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cost ($)'
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Yield chart - prepare data
+    const yieldData = {
+        'Eggs (hundreds)': data.total_yields.eggs / 100,
+        'Milk (gallons)': data.total_yields.milk,
+        'Meat (lbs)': data.total_yields.meat,
+        'Wool (lbs)': data.total_yields.wool,
+        'Fiber (lbs)': data.total_yields.fiber
+    };
+    
+    const yieldLabels = Object.keys(yieldData);
+    const yieldValues = Object.values(yieldData);
+    
+    // Filter out zero values
+    const filteredLabels = [];
+    const filteredValues = [];
+    for (let i = 0; i < yieldLabels.length; i++) {
+        if (yieldValues[i] > 0) {
+            filteredLabels.push(yieldLabels[i]);
+            filteredValues.push(yieldValues[i]);
+        }
+    }
+    
+    // Yield chart
+    const yieldCtx = document.getElementById('yieldChart').getContext('2d');
+    if (yieldChart) yieldChart.destroy();
+    
+    if (filteredLabels.length > 0) {
+        yieldChart = new Chart(yieldCtx, {
+            type: 'pie',
+            data: {
+                labels: filteredLabels,
+                datasets: [{
+                    data: filteredValues,
+                    backgroundColor: [
+                        'rgba(255, 205, 86, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    } else {
+        document.getElementById('yieldChart').innerHTML = 'No yield data to display';
+    }
+}
+</script>
+
+</body>
+</html>
